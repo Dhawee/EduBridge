@@ -1,7 +1,8 @@
-import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import Button from "../components/Button";
-import { schools } from "./SchoolsList";
+  import React from "react";
+  import { useParams, useNavigate } from "react-router-dom";
+  import Button from "../components/Button";
+  import { schools } from "./SchoolsList";
+  import siteLogo from "../assets/logo.png";
 
 export default function SchoolDetails() {
   const { id } = useParams();
@@ -44,7 +45,7 @@ export default function SchoolDetails() {
       <div className="grid md:grid-cols-3 gap-8 mb-10">
         <div className="flex flex-col items-center md:items-start md:col-span-1 bg-white p-6 rounded-xl shadow border border-gray-200">
           <img
-            src={school.logo}
+            src={school.logo || siteLogo}
             alt={`${school.name} Logo`}
             className="w-36 h-36 rounded-full object-cover border-4 border-green-500 mb-4"
           />

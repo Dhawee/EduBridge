@@ -1,11 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import schoolsData from "../../data/schoolsData";
 
 export default function DashboardHome() {
   const [search, setSearch] = useState("");
+  const [userName, setUserName] = useState("Student");
+  const [userPicture, setUserPicture] = useState("");
   const navigate = useNavigate();
+
+  // Load user name and picture from localStorage
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem("user") || "{}");
+    if (userData.fullName) {
+      setUserName(userData.fullName);
+    }
+    if (userData.passport) {
+      setUserPicture(userData.passport);
+    }
+  }, []);
 
   const filteredSchools = schoolsData.filter((school) =>
     school.name.toLowerCase().includes(search.toLowerCase())
@@ -19,29 +32,17 @@ export default function DashboardHome() {
   return (
     <div>
       {/* HEADER */}
-      <h1 className="text-3xl font-bold mb-2">Welcome Back ✨</h1>
-
-      <p className="text-gray-300 mb-8">
-        Here’s a quick overview of your student activities.
-      </p>
-
-      {/* STAT CARDS
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <div className="p-6 bg-gray-800 rounded-xl shadow border border-gray-700">
-          <h3 className="text-xl font-semibold">Schools</h3>
-          <p className="text-gray-400 mt-2">Here are the list of schools applied</p>
+      <div className="flex items-center gap-4 mb-8">
+        <img
+          src={userPicture || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}
+          alt="Profile"
+          className="w-16 h-16 rounded-full border-2 border-green-500 object-cover"
+        />
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Welcome {userName} ✨</h1>
+          <p className="text-gray-300">Here's a quick overview of your student activities.</p>
         </div>
-
-        <div className="p-6 bg-gray-800 rounded-xl shadow border border-gray-700">
-          <h3 className="text-xl font-semibold">Results</h3>
-          <p className="text-gray-400 mt-2">Latest grades available</p>
-        </div>
-
-        <div className="p-6 bg-gray-800 rounded-xl shadow border border-gray-700">
-          <h3 className="text-xl font-semibold">Notifications</h3>
-          <p className="text-gray-400 mt-2">2 new alerts</p>
-        </div>
-      </div> */}
+      </div>
 
       {/* SEARCH BAR */}
       <div className="mb-8 flex justify-center">

@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Button from "../components/Button";
+import heroImg from "../assets/Hero 1.jpg";
+import siteLogo from "../assets/logo.png";
 
 // 20 Schools extracted from your sheet (sample from your data)
 const rawSchools = [
@@ -28,11 +30,63 @@ const rawSchools = [
   { name: "Ikoro High School", address: "Ikoro Ekiti", lga: "IKORO", established: 1973 },
 ];
 
-// Add IDs + images automatically
+// Helper arrays to generate details
+const sampleCourses = [
+  "Mathematics",
+  "English",
+  "Biology",
+  "Chemistry",
+  "Physics",
+  "Computer Science",
+  "Economics",
+  "History",
+  "Geography",
+  "Business Studies",
+];
+
+const sampleFacilities = [
+  "Science Labs",
+  "Library",
+  "Computer Lab",
+  "Sports Field",
+  "Hostel/Boarding",
+  "Cafeteria",
+  "Art Studio",
+  "Music Room",
+  "Guidance Counselor",
+  "Medical Clinic",
+];
+
+function pickItems(arr, seed, count) {
+  const items = [];
+  for (let i = 0; i < count; i++) {
+    items.push(arr[(seed + i) % arr.length]);
+  }
+  return items;
+}
+
+function generateDetails(school, i) {
+  const type = i % 2 === 0 ? "Public" : "Private";
+  const courses = pickItems(sampleCourses, i, 4);
+  const facilities = pickItems(sampleFacilities, i + 2, 4);
+  const fees = `₦${(Math.floor(50 + (i % 10) * 5) * 1000).toLocaleString()}/term`;
+  const description = `${school.name} is a well-established ${type.toLowerCase()} school located in ${school.lga}. Established in ${school.established}, the school focuses on strong academic performance and holistic student development. The school offers a range of courses including ${courses.slice(0, 3).join(", ")} and maintains facilities such as ${facilities.slice(0, 3).join(", ")}.`;
+  return {
+    type,
+    courses,
+    facilities,
+    fees,
+    description,
+    logo: siteLogo,
+  };
+}
+
+// Add IDs + use the shared hero image and generated details for all schools
 const schools = rawSchools.map((s, i) => ({
   id: i + 1,
   ...s,
-  img: `/assets/school${(i % 3) + 1}.jpg`,
+  img: heroImg,
+  ...generateDetails(s, i),
 }));
 
 export default function SchoolsList() {
@@ -92,7 +146,7 @@ export default function SchoolsList() {
             to={`/schools/${school.id}`}
             className="border rounded-xl overflow-hidden hover:shadow-xl transition"
           >
-            <img src={school.img} className="w-full h-44 object-cover" />
+            <img src={school.img} alt={school.name} className="w-full h-44 object-cover" />
             <div className="p-4">
               <h2 className="text-lg font-semibold">{school.name}</h2>
               <p className="text-gray-600 text-sm">{school.address}</p>

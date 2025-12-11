@@ -19,6 +19,19 @@ export default function DashboardLayout() {
   const [theme, setTheme] = useState("dark");
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [userName, setUserName] = useState("Student");
+  const [userPicture, setUserPicture] = useState("");
+
+  // Load user name and picture from localStorage
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem("user") || "{}");
+    if (userData.fullName) {
+      setUserName(userData.fullName);
+    }
+    if (userData.passport) {
+      setUserPicture(userData.passport);
+    }
+  }, []);
 
   const menuItems = [
     { name: "Home", path: "/dashboard", icon: <HomeIcon className="w-5 h-5" /> },
@@ -125,13 +138,6 @@ export default function DashboardLayout() {
         {/* MAIN CONTENT */}
         <main className="flex-1 p-4 md:p-8 overflow-y-auto ml-0 md:ml-5 transition-all duration-300">
           <div className="flex items-center gap-4 mb-8">
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-              className="w-14 h-14 rounded-full border-2 border-green-500"
-            />
-            <h2 className="text-3xl font-bold">
-              Welcome, <span className="text-green-500">Williams</span>
-            </h2>
           </div>
 
           <Outlet />
