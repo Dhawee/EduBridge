@@ -1,0 +1,28 @@
+@media print {
+  body {
+    background: white !important;
+  }
+
+  .print-area {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 20mm;
+    background: white;
+    color: black;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .watermark {
+    position: fixed;
+    top: 40%;
+    left: 25%;
+    opacity: 0.08;
+    font-size: 5rem;
+    transform: rotate(-30deg);
+    z-index: 0;
+    pointer-events: none;
+  }
+}

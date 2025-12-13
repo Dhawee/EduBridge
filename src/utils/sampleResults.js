@@ -1,48 +1,43 @@
-// Sample exam results for testing
-export const sampleExamResults = [
-  {
-    examName: "Mathematics Final Exam",
-    schoolName: "Lagos State University",
-    date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
-    score: 88,
-    questions: [
-      { question: "What is 2 + 2?", correctAnswer: "4" },
-      { question: "What is the square root of 144?", correctAnswer: "12" },
-      { question: "What is 15 × 8?", correctAnswer: "120" },
-    ],
-    answers: ["4", "12", "120"],
-    submittedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    examName: "English Literature",
-    schoolName: "University of Ibadan",
-    date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
-    score: 75,
-    questions: [
-      { question: "Who wrote Romeo and Juliet?", correctAnswer: "William Shakespeare" },
-      { question: "What is the main theme of Hamlet?", correctAnswer: "Revenge" },
-    ],
-    answers: ["William Shakespeare", "Revenge"],
-    submittedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    examName: "Physics Mid-Term",
-    schoolName: "Obafemi Awolowo University",
-    date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-    score: 92,
-    questions: [
-      { question: "What is the SI unit of force?", correctAnswer: "Newton" },
-      { question: "What is the speed of light?", correctAnswer: "3 × 10^8 m/s" },
-    ],
-    answers: ["Newton", "3 × 10^8 m/s"],
-    submittedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-  },
+// src/utils/sampleResults.js
+
+/* ✅ HARD-CODED SCHOOL NAMES (NO DATA IMPORTS) */
+const schoolNames = [
+  "Ado Comm High Schl, Ado Ekiti",
+  "Ado Grammar School, Ado Ekiti",
+  "All Souls Ang Gram Schl, Ado Ekiti",
+  "Amure Comm High Schl, Ado Ekiti",
 ];
 
-// Initialize sample data if no results exist
+// Helper functions
+const getRandomScore = () => Math.floor(Math.random() * 41) + 50; // 50–90
+const maybeIncorrect = (correct) =>
+  Math.random() < 0.7 ? correct : "Wrong Answer";
+
+// Create sample exam results
+export const sampleExamResults = schoolNames.map((school, idx) => ({
+  examName: [
+    "Mathematics Final Exam",
+    "English Literature",
+    "Physics Mid-Term",
+    "Chemistry Quiz",
+  ][idx],
+  schoolName: school,
+  date: new Date(
+    Date.now() - (idx + 1) * 24 * 60 * 60 * 1000
+  ).toISOString(),
+  score: getRandomScore(),
+  questions: [
+    { question: `Sample Question 1 for ${school}`, correctAnswer: "Answer 1" },
+    { question: `Sample Question 2 for ${school}`, correctAnswer: "Answer 2" },
+    { question: `Sample Question 3 for ${school}`, correctAnswer: "Answer 3" },
+  ],
+  answers: ["Answer 1", "Answer 2", "Answer 3"].map(maybeIncorrect),
+  submittedAt: new Date(
+    Date.now() - (idx + 1) * 24 * 60 * 60 * 1000
+  ).toISOString(),
+}));
+
+// Force overwrite localStorage
 export const initializeSampleResults = () => {
-  const existing = localStorage.getItem("examResults");
-  if (!existing || JSON.parse(existing).length === 0) {
-    localStorage.setItem("examResults", JSON.stringify(sampleExamResults));
-  }
+  localStorage.setItem("examResults", JSON.stringify(sampleExamResults));
 };

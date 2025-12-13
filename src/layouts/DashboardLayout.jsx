@@ -22,15 +22,16 @@ export default function DashboardLayout() {
   const [userName, setUserName] = useState("Student");
   const [userPicture, setUserPicture] = useState("");
 
-  // Load user name and picture from localStorage
+  // Load user name, picture, and theme from localStorage
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user") || "{}");
-    if (userData.fullName) {
-      setUserName(userData.fullName);
-    }
-    if (userData.passport) {
-      setUserPicture(userData.passport);
-    }
+    if (userData.fullName) setUserName(userData.fullName);
+    if (userData.passport) setUserPicture(userData.passport);
+
+    const savedTheme = localStorage.getItem("theme") || "dark";
+    setTheme(savedTheme);
+    if (savedTheme === "dark") document.documentElement.classList.add("dark");
+    else document.documentElement.classList.remove("dark");
   }, []);
 
   const menuItems = [
@@ -40,11 +41,6 @@ export default function DashboardLayout() {
     { name: "Results", path: "/dashboard/results", icon: <ChartBarIcon className="w-5 h-5" /> },
     { name: "Notifications", path: "/dashboard/notifications", icon: <BellIcon className="w-5 h-5" /> },
   ];
-
-  useEffect(() => {
-    if (theme === "dark") document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
-  }, [theme]);
 
   const handleLogout = () => {
     setShowLogoutModal(false);
@@ -88,15 +84,28 @@ export default function DashboardLayout() {
 
           {/* Sidebar Footer */}
           <div className="flex flex-col space-y-3 mt-4">
-            {/* Theme Toggle */}
+
+            {/* Dark/Light Mode Toggle UNDER Notifications */}
             <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="flex items-center justify-center w-full py-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+              onClick={() => {
+                const newTheme = theme === "dark" ? "light" : "dark";
+                setTheme(newTheme);
+                localStorage.setItem("theme", newTheme);
+                if (newTheme === "dark") document.documentElement.classList.add("dark");
+                else document.documentElement.classList.remove("dark");
+              }}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition"
             >
               {theme === "dark" ? (
-                <SunIcon className="w-5 h-5 text-yellow-400" />
+                <>
+                  <SunIcon className="w-5 h-5 text-yellow-400" />
+                  <span>Light Mode</span>
+                </>
               ) : (
-                <MoonIcon className="w-5 h-5 text-gray-900" />
+                <>
+                  <MoonIcon className="w-5 h-5 text-gray-900" />
+                  <span>Dark Mode</span>
+                </>
               )}
             </button>
 
@@ -137,9 +146,6 @@ export default function DashboardLayout() {
 
         {/* MAIN CONTENT */}
         <main className="flex-1 p-4 md:p-8 overflow-y-auto ml-0 md:ml-5 transition-all duration-300">
-          <div className="flex items-center gap-4 mb-8">
-          </div>
-
           <Outlet />
         </main>
       </div>
