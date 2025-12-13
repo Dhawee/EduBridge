@@ -14,7 +14,7 @@ export default function HeroSection() {
       {/* Text Container */}
       <div className="relative z-10 max-w-7xl mx-auto h-full flex flex-col justify-center px-6 md:px-16 text-white">
         <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-          Connecting Primary Students to <br /> Ekiti Secondary Schools
+          Connecting Students to <br /> Ekiti Secondary Schools
         </h1>
 
         <p className="mt-4 text-lg md:text-xl text-gray-100 max-w-2xl">
