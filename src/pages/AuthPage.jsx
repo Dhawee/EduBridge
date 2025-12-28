@@ -8,8 +8,8 @@ import { useToast } from "../components/Toast";
 // const API_BASE_REGISTER = "https://www.hackathon.mydev.com.ng/api/auth/signup";
 // const API_BASE_LOGIN = "https://www.hackathon.mydev.com.ng/api/auth/login";
 
-const API_BASE_REGISTER = "https://edu-bridge-bice.vercel.app/auth/signup";
-const API_BASE_LOGIN = "https://edu-bridge-bice.vercel.app/auth/login";
+const API_BASE_REGISTER = "https://edu-bridge-bice.vercel.app/auth";
+const API_BASE_LOGIN = "https://edu-bridge-bice.vercel.app/auth";
 
 async function apiRequest(url, data) {
   try {
