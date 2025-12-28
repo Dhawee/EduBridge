@@ -5,8 +5,11 @@ import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "../components/Toast";
 
-const API_BASE_REGISTER = "https://www.hackathon.mydev.com.ng/api/auth/signup";
-const API_BASE_LOGIN = "https://www.hackathon.mydev.com.ng/api/auth/login";
+// const API_BASE_REGISTER = "https://www.hackathon.mydev.com.ng/api/auth/signup";
+// const API_BASE_LOGIN = "https://www.hackathon.mydev.com.ng/api/auth/login";
+
+const API_BASE_REGISTER = "https://edu-bridge-bice.vercel.app/auth/signup";
+const API_BASE_LOGIN = "https://edu-bridge-bice.vercel.app/auth/login";
 
 async function apiRequest(url, data) {
   try {
