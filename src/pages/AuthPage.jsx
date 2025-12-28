@@ -5,14 +5,32 @@ import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "../components/Toast";
 
-// Use the Vercel URL as the single source of truth
-const API_BASE_URL = "edu-bridge-bice.vercel.app";
+// const API_BASE_REGISTER = "https://www.hackathon.mydev.com.ng/api/auth/signup";
+// const API_BASE_LOGIN = "https://www.hackathon.mydev.com.ng/api/auth/login";
+
+const API_BASE_REGISTER = "https://edu-bridge-bice.vercel.app/auth";
+const API_BASE_LOGIN = "https://edu-bridge-bice.vercel.app/auth";
+
+async function apiRequest(url, data) {
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    const json = await res.json();
+    return { ok: res.ok, data: json };
+  } catch (err) {
+    return { ok: false, data: { message: "Network error" } };
+  }
+}
 
 export default function AuthPage() {
   const [tab, setTab] = useState("login");
   const location = useLocation();
   const { toast } = useToast();
 
+  // Pre-fill email if navigated from verification
   const prefillEmail = location.state?.email || "";
   const verified = location.state?.verified || false;
 
@@ -24,17 +42,19 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center px-4">
-      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 rounded-3xl overflow-hidden shadow-2xl border border-white/10 backdrop-blur-xl bg-white/5 mt-30 mb-20">
-        <div className="p-10 text-white flex flex-col justify-center">
+      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 rounded-3xl overflow-hidden shadow-2xl border border-white/10 backdrop-blur-xl bg-white/5 animate-scaleIn mt-30 mb-20">
+        <div className="p-10 text-white flex flex-col justify-center animate-slideIn">
           <div className="flex space-x-6 mb-8">
             <button
-              className={`pb-2 text-lg font-semibold ${tab === "login" ? "border-b-4 border-green-400 text-green-400" : "text-gray-400"}`}
+              className={`pb-2 text-lg font-semibold ${tab === "login" ? "border-b-4 border-green-400 text-green-400" : "text-gray-400"
+                }`}
               onClick={() => setTab("login")}
             >
               Login
             </button>
             <button
-              className={`pb-2 text-lg font-semibold ${tab === "register" ? "border-b-4 border-green-400 text-green-400" : "text-gray-400"}`}
+              className={`pb-2 text-lg font-semibold ${tab === "register" ? "border-b-4 border-green-400 text-green-400" : "text-gray-400"
+                }`}
               onClick={() => setTab("register")}
             >
               Register
@@ -70,27 +90,36 @@ function LoginForm({ defaultEmail }) {
     setLoading(true);
 
     try {
-      // Correctly append /login to the Vercel base URL
-      const res = await fetch(`${API_BASE_URL}/login`, {
+      // FIX 1: Append '/login' to your Vercel base URL
+      const res = await fetch(`${API_BASE_LOGIN}/login`, { 
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password: password.trim() }),
+        body: JSON.stringify({
+          email: email.trim(),
+          password: password.trim(),
+        }),
       });
 
       const data = await res.json();
       setLoading(false);
 
       if (!res.ok) {
-        const msg = data?.message || "Login failed";
+        // FIX 2: Better error message handling
+        const msg = data?.message || (data?.errors ? Object.values(data.errors).flat().join(", ") : "Login failed");
         setError(msg);
         toast(msg, { type: "error" });
         return;
       }
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      toast("Login successful!", { type: "success" });
-      navigate("/dashboard", { replace: true });
+      // Ensure your backend actually returns 'token' and 'user' at the top level
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user || {}));
+        toast("Login successful!", { type: "success" });
+        navigate("/dashboard", { replace: true });
+      } else {
+        throw new Error("No token received from server");
+      }
 
     } catch (err) {
       setLoading(false);
@@ -100,24 +129,60 @@ function LoginForm({ defaultEmail }) {
   };
 
   return (
-    <form className="space-y-6" onSubmit={handleLogin}>
+    <form className="space-y-6 animate-fadeIn" onSubmit={handleLogin}>
       {error && <p className="text-red-400">{error}</p>}
-      <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-      <PasswordInput label="Password" show={showPassword} setShow={setShowPassword} value={password} onChange={(e) => setPassword(e.target.value)} />
-      <button type="submit" disabled={loading} className="w-full py-3 bg-green-500 hover:bg-green-600 text-black font-bold rounded-xl shadow-lg transition">
+
+      {/* Ensure these sub-components are defined or use standard <input> tags */}
+      <div className="flex flex-col">
+        <label className="text-sm text-gray-400">Email</label>
+        <input 
+          type="email" 
+          value={email} 
+          onChange={(e) => setEmail(e.target.value)} 
+          className="bg-white/10 border border-white/20 p-3 rounded-xl focus:outline-none focus:border-green-400"
+          required 
+        />
+      </div>
+
+      <div className="flex flex-col relative">
+        <label className="text-sm text-gray-400">Password</label>
+        <input 
+          type={showPassword ? "text" : "password"} 
+          value={password} 
+          onChange={(e) => setPassword(e.target.value)} 
+          className="bg-white/10 border border-white/20 p-3 rounded-xl focus:outline-none focus:border-green-400"
+          required 
+        />
+        <button 
+          type="button" 
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-3 top-9 text-gray-400"
+        >
+          {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+        </button>
+      </div>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full py-3 bg-green-500 hover:bg-green-600 text-black font-bold rounded-xl shadow-lg transition disabled:opacity-50"
+      >
         {loading ? "Logging in..." : "Login"}
       </button>
     </form>
   );
 }
 
+
+
 /* ---------------------------- REGISTER FORM ---------------------------- */
 function RegisterForm() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [fullname, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -128,6 +193,11 @@ function RegisterForm() {
     e.preventDefault();
     setError("");
 
+    if (!fullname || !email || !password || !confirm) {
+      setError("All fields are required");
+      return;
+    }
+
     if (password !== confirm) {
       setError("Passwords do not match");
       return;
@@ -136,18 +206,20 @@ function RegisterForm() {
     setLoading(true);
 
     try {
-      // Correctly append /signup to the Vercel base URL
-      const res = await fetch(`${API_BASE_URL}/signup`, {
+      const payload = { fullname: fullname.trim(), email: email.trim(), password: password.trim() };
+
+      const res = await fetch("https://www.hackathon.mydev.com.ng/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fullname: fullname.trim(), email: email.trim(), password: password.trim() }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
       setLoading(false);
 
       if (!res.ok) {
-        const msg = data?.message || "Registration failed";
+        // Handle validation errors array or message
+        const msg = data?.message || (data?.errors ? Object.values(data.errors).flat().join(", ") : "Registration failed");
         setError(msg);
         toast(msg, { type: "error" });
         return;
@@ -158,18 +230,19 @@ function RegisterForm() {
 
     } catch (err) {
       setLoading(false);
+      console.error(err);
       setError("Network error. Please try again.");
       toast("Network error. Please try again.", { type: "error" });
     }
   };
 
   return (
-    <form className="space-y-6" onSubmit={handleRegister}>
+    <form className="space-y-6 animate-fadeIn" onSubmit={handleRegister}>
       {error && <p className="text-red-400">{error}</p>}
       <Input label="Full Name" value={fullname} onChange={(e) => setFullName(e.target.value)} />
       <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
       <PasswordInput label="Password" show={showPassword} setShow={setShowPassword} value={password} onChange={(e) => setPassword(e.target.value)} />
-      <PasswordInput label="Confirm Password" show={showPassword} setShow={setShowPassword} value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+      <PasswordInput label="Confirm Password" show={showConfirm} setShow={setShowConfirm} value={confirm} onChange={(e) => setConfirm(e.target.value)} />
       <button type="submit" disabled={loading} className="w-full py-3 bg-green-500 hover:bg-green-600 text-black font-bold rounded-xl shadow-lg transition">
         {loading ? "Creating Account..." : "Create Account"}
       </button>
@@ -177,18 +250,13 @@ function RegisterForm() {
   );
 }
 
-/* ---------------------------- UI HELPER COMPONENTS ---------------------------- */
 
-function Input({ label, type = "text", ...props }) {
+/* ---------------------------- Shared Inputs ---------------------------- */
+function Input({ label, ...props }) {
   return (
     <div className="flex flex-col space-y-1">
-      <label className="text-sm text-gray-400">{label}</label>
-      <input
-        {...props}
-        type={type}
-        className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 focus:border-green-400 focus:outline-none transition-all"
-        required
-      />
+      <label className="text-sm text-gray-300">{label}</label>
+      <input {...props} className="px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-green-400 outline-none transition" />
     </div>
   );
 }
@@ -196,22 +264,11 @@ function Input({ label, type = "text", ...props }) {
 function PasswordInput({ label, show, setShow, ...props }) {
   return (
     <div className="flex flex-col space-y-1 relative">
-      <label className="text-sm text-gray-400">{label}</label>
-      <div className="relative">
-        <input
-          {...props}
-          type={show ? "text" : "password"}
-          className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 focus:border-green-400 focus:outline-none transition-all"
-          required
-        />
-        <button
-          type="button"
-          onClick={() => setShow(!show)}
-          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
-        >
-          {show ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
-        </button>
-      </div>
+      <label className="text-sm text-gray-300">{label}</label>
+      <input type={show ? "text" : "password"} {...props} className="px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-green-400 outline-none pr-12" />
+      <button type="button" onClick={() => setShow(!show)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300">
+        {show ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+      </button>
     </div>
   );
 }
